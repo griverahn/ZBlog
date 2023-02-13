@@ -44,7 +44,7 @@ namespace ZBlogAPI.Controllers
         }
 
         [Authorize(Roles = "Editor")]
-        [HttpPost("/api/update-posts-status")]
+        [HttpPatch("/api/update-posts-status")]
         public async Task<IActionResult> UpdatePostsStatus(List<PostDto> editedPosts)
         {
             return Ok(await _postsAppService.UpdatePostsStatus(editedPosts));
@@ -58,7 +58,7 @@ namespace ZBlogAPI.Controllers
         }
 
         [Authorize(Roles = "Writer")]
-        [HttpPatch("/api/edit-post")]
+        [HttpPost("/api/edit-post")]
         public async Task<IActionResult> EditPost(PostDto postDto)
         {
             return Ok(await _postsAppService.EditPost(postDto));

@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ZBlogAPI.DataContext;
 using ZBlogAPI.Models;
 using ZBlogAPI.Models.DTO;
 
@@ -13,11 +14,15 @@ namespace ZBlogAPI.AppServices
         private const string uniqueValidator = "ASHDTHWNSD123445DSA243F123F34F";
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        ApplicationDBContext _dbContext;
 
-        public AuthenticateAppService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public AuthenticateAppService(UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDBContext dbContext)
         {
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            _dbContext = dbContext;
         }
 
         public async Task<AuthenticationDto> Login(LoginDto model)
@@ -93,6 +98,11 @@ namespace ZBlogAPI.AppServices
             }
 
             return new AuthenticationDto { Message = "User created successfully!" };
+        }
+
+        public async Task<string> GetUserId(string userName)
+        {
+            return _dbContext.Users.FirstOrDefault(s=>s.UserName == userName).Id;
         }
     }
 }

@@ -9,7 +9,7 @@ using ZBlogAPI.Models.DTO;
 
 namespace ZBlogAPI.Test
 {
-    public class UnitTest1
+    public class PostTests
     {
         [Fact]
         public async Task Test1()

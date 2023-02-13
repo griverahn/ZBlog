@@ -26,5 +26,11 @@ namespace ZBlogAPI.Controllers
         {
             return Ok(await _authentication.AddUser(userInfo));
         }
+
+        [HttpPost("/api/get-user-id")]
+        public async Task<IActionResult> GetUserId(string userName)
+        {
+            return Ok(await _authentication.GetUserId(userName));
+        }
     }
 }

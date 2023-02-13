@@ -165,7 +165,9 @@ namespace ZBlogAPI.Migrations
                     Title = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    PublishingDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    PublishingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ApprovalComments = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {

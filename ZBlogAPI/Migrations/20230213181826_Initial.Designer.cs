@@ -12,7 +12,7 @@ using ZBlogAPI.DataContext;
 namespace ZBlogAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20230208015542_Initial")]
+    [Migration("20230213181826_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,6 +200,12 @@ namespace ZBlogAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("ApprovalComments")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("ApprovalComments");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -209,6 +215,12 @@ namespace ZBlogAPI.Migrations
                     b.Property<DateTime>("PublishingDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("PublishingDate");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Status");
 
                     b.Property<string>("Title")
                         .IsRequired()

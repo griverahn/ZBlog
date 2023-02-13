@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using ZBlogAPI.DataContext;
 using ZBlogAPI.Models;
 using ZBlogAPI.Models.DTO;
@@ -15,10 +12,10 @@ namespace ZBlogAPI.AppServices
         const string PendingApproval = "Pending Approval";
         const string Approved = "Approved";
         const string Rejected = "Rejected";
+        private const string Writer = "Writer";
 
         public PostsAppService(ApplicationDBContext dbContext) { 
             _dbContext= dbContext;
-
         }
                                                                                                                                                                                                    
         public async Task<List<PostDto>> GetAllPosts()
@@ -46,41 +43,38 @@ namespace ZBlogAPI.AppServices
         }
 
         public async Task<List<PostDto>> UpdatePostsStatus(List<PostDto> editedPosts)
-        {            
-            var dbPosts = await _dbContext.Posts.Where(s => editedPosts.Select(x=>x.Id).Contains(s.Id))
-                                                .ToListAsync();
-
-            foreach (var editedPost in editedPosts)
+        {
+            if (editedPosts.Any())
             {
+                var dbPosts = await _dbContext.Posts.Where(s => editedPosts.Select(x => x.Id).Contains(s.Id))
+                                                    .ToListAsync();
+                var hasError = false;
+
                 foreach (var dbPost in dbPosts)
                 {
-                    if (editedPost.Id == dbPost.Id)
+                    PostDto editedPost = editedPosts.FirstOrDefault(s => s.Id == dbPost.Id);
+
+                    if (editedPost != null)
                     {
-                        if (editedPost.Status == Approved)
+                        if (IsValidStatus(editedPost.Status))
                         {
-                            dbPost.Status = Approved;
+                            dbPost.Status = editedPost.Status;
+                            dbPost.ApprovalComments = editedPost.ApprovalComments;
                         }
-                        else { 
-                            //return invalid status attempt
-                        }
-
-
-                        if (editedPost.Status == Rejected)
+                        else
                         {
-                            dbPost.Status = Approved;
+                            hasError = true;                            
+                            editedPosts.FirstOrDefault(s => s.Id == editedPost.Id).Message = "Incorrect Status.";
                         }
-                        else {
-                            //return invalid status attempt
-                        }
-
                     }
                 }
+
+                if (!hasError)
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
             }
-
-            //Manejar excepciones aqui
-            await _dbContext.SaveChangesAsync();
-
-            return await ConvertPostsToDto(dbPosts);
+            return editedPosts;
         }
 
         public async Task<CommentDto> AddComment(CommentDto commentDto)
@@ -162,7 +156,7 @@ namespace ZBlogAPI.AppServices
             }
         }
 
-        public async Task<PostDto> SubmmitPost(PostDto postDto)
+        public async Task<PostDto> SubmitPost(PostDto postDto)
         {
             Post dbPost = await GetSpecificPost(postDto);
 
@@ -207,17 +201,11 @@ namespace ZBlogAPI.AppServices
             await _dbContext.SaveChangesAsync();
         }
 
-        private async Task<string> GetUserName(string userId)
-        {
-            //TODO: Revisar mejores practicas
-            return await _dbContext.Users.Where(s => s.Id == userId)
-                                         .Select(x => x.UserName)
-                                         .FirstOrDefaultAsync();
-        }
-
         private async Task<List<PostDto>> ConvertPostsToDto(List<Post> dbPosts)
         {
             var result = new List<PostDto>();
+            var usersIds = dbPosts.Select(s => s.UserId);
+            var users = await _dbContext.Users.Where(s => usersIds.Contains(s.Id)).ToListAsync();
 
             foreach (var post in dbPosts)
             {
@@ -225,14 +213,26 @@ namespace ZBlogAPI.AppServices
                 {
                     Title = post.Title,
                     Description = post.Description,
-                    UserName = await GetUserName(post.UserId),
+                    UserName = users.FirstOrDefault(s => s.Id == post.UserId).Name,
                     PublishingDate = post.PublishingDate,
-                    Status = post.Status
+                    Status = post.Status,
+                    ApprovalComments = users.FirstOrDefault(s => s.Id == post.UserId).Role == Writer ? post.ApprovalComments : string.Empty
                 };
                 result.Add(postDto);
             }
 
             return result;
+        }
+
+        private bool IsValidStatus(string status)
+        {
+            List<string> validStates = new List<string>
+            {
+                Approved,
+                Rejected
+            };
+
+            return validStates.Contains(status);
         }
 
     }

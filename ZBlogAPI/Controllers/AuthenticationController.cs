@@ -21,10 +21,10 @@ namespace ZBlogAPI.Controllers
             return Ok(await _authentication.Login(authentication));            
         }
 
-        [HttpPost("/api/register-admin")]
-        public async Task<IActionResult> RegisterAdmin(UserDto userInfo)
+        [HttpPost("/api/add-user")]
+        public async Task<IActionResult> AddUser(UserDto userInfo)
         {
-            return Ok(await _authentication.RegisterAdmin(userInfo));
+            return Ok(await _authentication.AddUser(userInfo));
         }
     }
 }

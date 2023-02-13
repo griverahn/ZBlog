@@ -22,6 +22,8 @@ namespace ZBlogAPI.DataContext.Maps
             builder.Property(x => x.PublishingDate).HasColumnName("PublishingDate").IsRequired();
             builder.Property(x => x.UserId).HasColumnName("UserId").HasColumnType("nvarchar").HasMaxLength(450)
                 .IsRequired();
+            builder.Property(x => x.ApprovalComments).HasColumnName("ApprovalComments").HasColumnType("varchar")
+                .HasMaxLength(500).IsRequired();
 
             builder.HasOne(x=> x.User).WithMany(c=> c.Posts).HasForeignKey(x => x.UserId);
 

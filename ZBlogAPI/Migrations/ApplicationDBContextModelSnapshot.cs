@@ -198,6 +198,12 @@ namespace ZBlogAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("ApprovalComments")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("ApprovalComments");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)

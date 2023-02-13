@@ -10,15 +10,14 @@ namespace ZBlogAPI.AppServices
 {
     public class AuthenticateAppService
     {
+        private const string uniqueValidator = "ASHDTHWNSD123445DSA243F123F34F";
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
-        //private readonly IConfiguration _configuration;
 
-        public AuthenticateAppService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)//, IConfiguration configuration)
+        public AuthenticateAppService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             this.roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
-            //_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public async Task<AuthenticationDto> Login(LoginDto model)
@@ -39,7 +38,7 @@ namespace ZBlogAPI.AppServices
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ASHDTHWNSD123445DSA243F123F34F"));
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(uniqueValidator));
 
                 var token = new JwtSecurityToken(
                     issuer: "URLDelProyectoUI",
@@ -57,11 +56,11 @@ namespace ZBlogAPI.AppServices
                         Expiration = token.ValidTo
                 };
             }
-            return new AuthenticationDto { Message = "Usuario o Clave son incorrectos" };
+            return new AuthenticationDto { Message = "User or Password are wrong!" };
         }
 
 
-        public async Task<AuthenticationDto> RegisterAdmin(UserDto model)
+        public async Task<AuthenticationDto> AddUser(UserDto model)
         {
             var userExists = await userManager.FindByNameAsync(model.UserName);
 
@@ -74,7 +73,8 @@ namespace ZBlogAPI.AppServices
             {
                 UserName = model.UserName,                
                 SecurityStamp = Guid.NewGuid().ToString(),
-                Name = model.Name
+                Name = model.Name,
+                Role = model.Role
             };
 
             var result = await userManager.CreateAsync(user, model.Password);
@@ -83,13 +83,13 @@ namespace ZBlogAPI.AppServices
             {
                 return new AuthenticationDto { Message = "User creation failed! Please check user details and try again." };
             }
-            if (!await roleManager.RoleExistsAsync("Admin"))
+            if (!await roleManager.RoleExistsAsync(user.Role))
             {
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
+                await roleManager.CreateAsync(new IdentityRole(user.Role));
             }
-            if (await roleManager.RoleExistsAsync("Admin"))
+            if (await roleManager.RoleExistsAsync(user.Role))
             {
-                await userManager.AddToRoleAsync(user, "Admin");
+                await userManager.AddToRoleAsync(user, user.Role);
             }
 
             return new AuthenticationDto { Message = "User created successfully!" };

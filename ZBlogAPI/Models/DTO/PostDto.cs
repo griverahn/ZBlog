@@ -9,8 +9,9 @@
         public string UserId { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime PublishingDate { get; set; }
+        public string ApprovalComments { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
-
+        public ICollection<CommentDto> Comments { get; internal set; } = new List<CommentDto>();
     }
 }
 
